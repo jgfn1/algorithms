@@ -10,16 +10,20 @@ typedef struct linked_list
 typedef struct graph
 {
 	lists* adj_list;
+	lists** front;
+	lists** rear;
 	int vertex_number;
 	int edge_number;
 } graphs;
 
 graphs* graph_insert(graphs* graph, int vertix1, int vertix2);
-void edges_printer(graphs* graph);
+void graph_print(graphs* graph);
 
 lists* list_find(lists* head, int value);
 lists* list_insert(lists* cur, int value);
 int list_delete(lists* cur);
+void enqueue(lists* rear, int value);
+int dequeue(lists* front, lists* rear);
 
 int main()
 {
@@ -35,7 +39,18 @@ int main()
 
 	printf("Insert the number of vertices and edges, respectively:\n");
 	scanf("%d %d", &vertex_number, &edge_number);
+	
 	graph->adj_list = (lists*) malloc(vertex_number * sizeof(lists));
+	
+	graph->front = (lists**) malloc(vertex_number * sizeof(lists));
+	graph->rear = (lists**) malloc(vertex_number * sizeof(lists));
+
+	for(i = 0; i < vertex_number; ++i)
+	{
+		graph->front[i] = &graph->adj_list[i];
+		graph->rear[i] = &graph->adj_list[i];
+	}
+
 	graph->vertex_number = vertex_number;
 	graph->edge_number = edge_number;
 
@@ -53,7 +68,7 @@ int main()
 		scanf("%d", &command);
 		if(command == 0)
 		{
-			edges_printer(graph);
+			graph_print(graph);
 		}
 		else if(command == 1)
 		{
@@ -70,17 +85,17 @@ graphs* graph_insert(graphs* graph, int vertix1, int vertix2)
 {
 	if(vertix1 != vertix2)
 	{
-		list_insert(&graph->adj_list[vertix1], vertix2);
-		list_insert(&graph->adj_list[vertix2], vertix1);		
+		enqueue(graph->rear[vertix1], vertix2);
+		enqueue(graph->rear[vertix2], vertix1);		
 	}
 	else
 	{
-		list_insert(&graph->adj_list[vertix1], vertix2);
+		enqueue(graph->rear[vertix1], vertix2);
 	}
 	return graph;
 }
 
-void edges_printer(graphs* graph)
+void graph_print(graphs* graph)
 {
 	lists* list = NULL;
 	int i;
@@ -124,4 +139,24 @@ int list_delete(lists* cur)	//Pop
 		free(aux);
 		return value;
 	}
+}
+
+void enqueue(lists* rear, int value)
+{
+	lists* new_rear = list_insert(rear, value);
+	rear = new_rear->next;
+}
+
+int dequeue(lists* front, lists* rear)
+{
+	int value = list_delete(front);
+	lists* new_rear;
+	lists* new_front = front;
+	if(new_front == NULL)
+	{
+		new_rear = new_front;
+		rear = new_rear;
+		front = new_front;
+	}
+	return value;
 }
