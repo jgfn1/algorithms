@@ -1,1 +1,6 @@
 dijkstra.cpp
+
+int main()
+{
+	
+}
