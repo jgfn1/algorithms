@@ -115,8 +115,8 @@ void dijkstra(graphs* graph, int source)
 	for(i = 0; i < graph->vertex_number; ++i)
 	{
 		pair = heap_extract(&Heap);
-
 		
+
 	}
 
 }
