@@ -93,7 +93,9 @@ int main()
 void dijkstra(graphs* graph, int source)
 {
 	int i;
-	pairs *pair;
+	pairs* pair = NULL;
+	lists* cursor = NULL;
+
 	for(i = 0; i < graph->vertex_number; ++i)
 	{
 		distances[i] = INT_MAX;
@@ -115,10 +117,18 @@ void dijkstra(graphs* graph, int source)
 	for(i = 0; i < graph->vertex_number; ++i)
 	{
 		pair = heap_extract(&Heap);
-		
-
+		cursor = graph->adj_list[pair->value1];
+		while(cursor != NULL)
+		{
+			if((distances[pair->value1] + cursor->weight) < distances[cursor->value])
+			{
+				distances[cursor->value] = distances[pair->value1] + cursor->weight;
+				fathers[cursor->value] = pair->value1;
+				heap_update(&Heap, distances[cursor->value], cursor->value);	
+			}
+			cursor = cursor->next;
+		}
 	}
-
 }
 
 graphs* graph_insert(graphs* graph, int vertix1, int vertix2, int weight)
