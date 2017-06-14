@@ -1,6 +1,0 @@
-dijkstra.cpp
-
-int main()
-{
-	
-}
