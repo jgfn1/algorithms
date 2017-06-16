@@ -35,6 +35,8 @@ void dijkstra(graphs* graph, int source);
 lists* prim(graphs* graph);
 
 graphs* graph_insert(graphs* graph, int vertix1, int vertix2, int weight);
+void graph_print(graphs* graph);
+int father_distance(graphs* graph, int vertex, int father);
 
 lists* list_insert(lists* cur, int value, int weight);
 void enqueue(lists* rear, int value, int weight);
@@ -70,7 +72,7 @@ int main()
     graph->vertex_number = 0;
     graph->edge_number = 0;
 
-    printf("Insert the number of vertices and edges, respectively:\n");
+    // printf("Insert the number of vertices and edges, respectively:\n");
     scanf("%d %d", &vertex_number, &edge_number);
 
     graph->adj_list = (lists*) malloc(vertex_number * sizeof(lists));
@@ -87,7 +89,7 @@ int main()
     graph->vertex_number = vertex_number;
     graph->edge_number = edge_number;
 
-    printf("Insert the edges in the form 'vertix1 vertix2 weight'):\n");
+    // printf("Insert the edges in the form 'vertix1 vertix2 weight'):\n");
     for(i = 0; i < edge_number; ++i)
     {
         scanf("%d %d %d", &vertix1, &vertix2, &weight);
@@ -104,47 +106,74 @@ int main()
 
     int source = 0;
     int destination = 0;
-    printf("Insert the path to be calculated by Dijkstra in the form 'source destination':\n");
+    // printf("Insert the path to be calculated by Dijkstra in the form 'source destination':\n");
     scanf("%d %d", &source, &destination);
     dijkstra(graph, source);
-    printf("The minimum-path cost is: %d\n", distances[destination]);
+    printf(/*"The minimum-path cost is:*/ "%d\n", distances[destination]);
 
     graph->adj_list = prim(graph);
     dijkstra(graph, source);
-    printf("The minimum-path cost with Prim's MST is: %d\n", distances[destination]);
+    printf(/*"The minimum-path cost with Prim's MST is:*/ "%d\n", distances[destination]);
+
+    // graph_print(graph);
 
     printf("%d ", source);
-
     int *path = (int*) malloc(vertex_number * sizeof(int));
     int traveler = destination;
     i = 0;
+    // printf("\nPath: ");
     while(traveler != source && fathers[traveler] != -1)
     {
         path[i] = traveler;
+        // printf("%d ", path[i]);
         traveler = fathers[traveler];
         i++;
     }
+    // printf("\n\n");
 
-    lists* cursor = &graph->adj_list[source];
-    cursor = cursor->next;
+    /*int x = source;
     int j = 0;
-    for(j = i; j >= 0; --j)
+    for(j = i - 1; j >= 0; --j)
     {
-        while(cursor != NULL && cursor->value != path[i])
+        // printf("j: %d | ", j);
+        if(prim_fathers[x] != -1)
         {
-            cursor = cursor->next;
+            printf("%d ", father_distance(graph, x, prim_fathers[x]));
+            x = path[j];
         }
-        if(cursor != NULL)
+        else
         {
-            printf("%d ", cursor->weight);
+            x = path[j];
+            ++j;
         }
-
-         cursor = &graph->adj_list[path[i]];
-         cursor = cursor->next;       
+    }*/
+    int answer = 0;
+    int j = 0;
+    // answer = father_distance(graph, path[j], fathers[path[j]]);
+    // printf("%d ", answer);
+    for(j = i - 1; j >= 0; --j)
+    {
+        // printf("j: %d | ", j);
+        answer = father_distance(graph, path[j], fathers[path[j]]);
+        if(fathers[path[j]] != -1 && answer != -1)
+            printf("%d ", answer);
     }
-    printf("%d\n", destination);
 
+    printf("%d\n", destination);
     return 0;
+}
+
+int father_distance(graphs* graph, int vertex, int father)
+{
+    lists *cursor = &graph->adj_list[vertex];
+    cursor = cursor->next;
+    while(cursor != NULL)
+    {
+        if(cursor->value == father)
+            return cursor->weight;
+        cursor = cursor->next;
+    }
+    return -1;
 }
 
 void dijkstra(graphs* graph, int source)
@@ -259,6 +288,23 @@ graphs* graph_insert(graphs* graph, int vertix1, int vertix2, int weight)
         enqueue(graph->rear[vertix1], vertix2, weight);
     }
     return graph;
+}
+
+void graph_print(graphs* graph)
+{
+    lists* list = NULL;
+    int i;
+    for(i = 0; i < graph->vertex_number; ++i)
+    {
+        list = &graph->adj_list[i];
+        list = list->next;
+        while(list != NULL)
+        {
+            printf("(%d,%d) | w: %d ||| ", i, list->value, list->weight);
+            list = list->next;
+        }
+        printf("\n");
+    }
 }
 
 lists* list_insert(lists* cur, int value, int weight)   // Push
