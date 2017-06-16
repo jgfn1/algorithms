@@ -112,6 +112,39 @@ int main()
     graph->adj_list = prim(graph);
     dijkstra(graph, source);
     printf("The minimum-path cost with Prim's MST is: %d\n", distances[destination]);
+
+    printf("%d ", source);
+
+    int *path = (int*) malloc(vertex_number * sizeof(int));
+    int traveler = destination;
+    i = 0;
+    while(traveler != source && fathers[traveler] != -1)
+    {
+        path[i] = traveler;
+        traveler = fathers[traveler];
+        i++;
+    }
+
+    lists* cursor = &graph->adj_list[source];
+    cursor = cursor->next;
+    int j = 0;
+    for(j = i; j >= 0; --j)
+    {
+        while(cursor != NULL && cursor->value != path[i])
+        {
+            cursor = cursor->next;
+        }
+        if(cursor != NULL)
+        {
+            printf("%d ", cursor->weight);
+        }
+
+         cursor = &graph->adj_list[path[i]];
+         cursor = cursor->next;       
+    }
+    printf("%d\n", destination);
+
+    return 0;
 }
 
 void dijkstra(graphs* graph, int source)
