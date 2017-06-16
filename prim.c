@@ -22,7 +22,7 @@ typedef struct heap
     int array_size;
     int* weight;
     int weight_size;
-    int size;	//Number of elements in the heap.
+    int size;   //Number of elements in the heap.
 } heap;
 
 typedef struct pair
@@ -106,7 +106,7 @@ lists* prim(graphs* graph)
     {
         weights[i] = -1;
         prim_fathers[i] = -1;
-        visited = 0;
+        visited[i] = 0;
     }
     int source = 0;
 
@@ -118,12 +118,8 @@ lists* prim(graphs* graph)
     Heaper.size = 0;
 //-----------------------------------------------------------//
     heap_insert(&Heaper, source, 0);
-    
+
     lists* mst = (lists*) malloc(graph->vertex_number * sizeof(lists));
-    for(i = 0; i < graph->vertex_number; ++i)
-    {
-        mst[i] = NULL;
-    }
 
     pairs* pair = NULL;
     int cost = 0;
@@ -137,8 +133,8 @@ lists* prim(graphs* graph)
             if(pair->value1 != source)
             {
                 int father = prim_fathers[pair->value1];
-                list_insert(mst[father], pair->value1, pair->value2);
-                list_insert(mst[pair->value1], father, pair->value2);
+                list_insert(&mst[father], pair->value1, pair->value2);
+                list_insert(&mst[pair->value1], father, pair->value2);
             }
             cursor = &graph->adj_list[pair->value1];
             cursor = cursor->next;
@@ -148,10 +144,10 @@ lists* prim(graphs* graph)
                 {
                     weights[cursor->weight] = cursor->weight;
                     prim_fathers[cursor->value] = pair->value1;
-                    heap_update(&Heaper, weights[cursor->value], cursor->value/*Can be wrong. <------------------ Possible error.*/)
+                    heap_update(&Heaper, weights[cursor->value], cursor->value/*Can be wrong. <------------------ Possible error.*/);
                 }
                 cursor = cursor->next;
-            }    
+            }
         }
     }
     return mst;
@@ -171,7 +167,7 @@ graphs* graph_insert(graphs* graph, int vertix1, int vertix2, int weight)
     return graph;
 }
 
-lists* list_insert(lists* cur, int value, int weight)	// Push
+lists* list_insert(lists* cur, int value, int weight)   // Push
 {
     lists* node  = (lists*) malloc(sizeof(lists));
     node->value = value;
