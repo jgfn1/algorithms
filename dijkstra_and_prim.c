@@ -22,7 +22,7 @@ typedef struct heap
     int array_size;
     int* weight;
     int weight_size;
-    int size;	//Number of elements in the heap.
+    int size;   //Number of elements in the heap.
 } heap;
 
 typedef struct pair
@@ -50,7 +50,7 @@ int* array_doubleler(int** array, int* array_size);
 
 heap Heaper;
 int* distances; //Minimum distance from S to all the vertex_number vertices
-int* fathers;	//Father of each vertix
+int* fathers;   //Father of each vertix
 
 int* weights;
 int* prim_fathers;
@@ -201,9 +201,9 @@ lists* prim(graphs* graph)
             cursor = cursor->next;
             while(cursor != NULL)
             {
-                if(cursor->weight < weights[cursor->value] && visited[cursor->value] == 0)
+                if((weights[cursor->value] == -1 || cursor->weight < weights[cursor->value]) && visited[cursor->value] == 0)
                 {
-                    weights[cursor->weight] = cursor->weight;
+                    weights[cursor->value] = cursor->weight;
                     prim_fathers[cursor->value] = pair->value1;
                     heap_update(&Heaper, weights[cursor->value], cursor->value/*Can be wrong. <------------------ Possible error.*/);
                 }
@@ -228,7 +228,7 @@ graphs* graph_insert(graphs* graph, int vertix1, int vertix2, int weight)
     return graph;
 }
 
-lists* list_insert(lists* cur, int value, int weight)	// Push
+lists* list_insert(lists* cur, int value, int weight)   // Push
 {
     lists* node  = (lists*) malloc(sizeof(lists));
     node->value = value;
