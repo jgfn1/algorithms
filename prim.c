@@ -98,7 +98,7 @@ int main()
     graph->adj_list = prim(graph);
 }
 
-lists* prim(graphs* graph)
+llists* prim(graphs* graph)
 {
     lists *cursor = NULL;
     int i = 0;
@@ -140,9 +140,9 @@ lists* prim(graphs* graph)
             cursor = cursor->next;
             while(cursor != NULL)
             {
-                if(weights[cursor->value] == -1 || cursor->weight < weights[cursor->value] && visited[cursor->value] == 0)
+                if((weights[cursor->value] == -1 || cursor->weight < weights[cursor->value]) && visited[cursor->value] == 0)
                 {
-                    weights[cursor->weight] = cursor->weight;
+                    weights[cursor->value] = cursor->weight;
                     prim_fathers[cursor->value] = pair->value1;
                     heap_update(&Heaper, weights[cursor->value], cursor->value/*Can be wrong. <------------------ Possible error.*/);
                 }
