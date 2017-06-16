@@ -140,7 +140,7 @@ lists* prim(graphs* graph)
             cursor = cursor->next;
             while(cursor != NULL)
             {
-                if(cursor->weight < weights[cursor->value] && visited[cursor->value] == 0)
+                if(weights[cursor->value] == -1 || cursor->weight < weights[cursor->value] && visited[cursor->value] == 0)
                 {
                     weights[cursor->weight] = cursor->weight;
                     prim_fathers[cursor->value] = pair->value1;
