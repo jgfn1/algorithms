@@ -3,18 +3,18 @@
 #include "limits.h"
 typedef struct linked_list
 {
-    struct linked_list* next;
     int value;
     int weight;
+    struct linked_list* next;
 } lists;
 
 typedef struct graph
 {
+    int vertex_number;
+    int edge_number;
     lists* adj_list;
     lists** front;
     lists** rear;
-    int vertex_number;
-    int edge_number;
 } graphs;
 
 typedef struct heap
@@ -104,7 +104,7 @@ int main()
 
 void dijkstra(graphs* graph, int source)
 {
-    int i;
+    int i = 0;
     pairs* pair = NULL;
     lists* cursor = NULL;
 
@@ -129,16 +129,20 @@ void dijkstra(graphs* graph, int source)
     for(i = 0; i < graph->vertex_number; ++i)
     {
         pair = heap_extract(&Heaper);
-        cursor = &graph->adj_list[pair->value1];
-        while(cursor != NULL)
+        if(pair->value1 != -1 && pair->value2 != -1)
         {
-            if(distances[cursor->value] == -1 || (distances[pair->value1] + cursor->weight) < distances[cursor->value])
-            {
-                distances[cursor->value] = distances[pair->value1] + cursor->weight;
-                fathers[cursor->value] = pair->value1;
-                heap_update(&Heaper, distances[cursor->value], cursor->value);
-            }
+            cursor = &graph->adj_list[pair->value1];
             cursor = cursor->next;
+            while(cursor != NULL)
+            {
+                if(distances[cursor->value] == -1 || (distances[pair->value1] + cursor->weight) < distances[cursor->value])
+                {
+                    distances[cursor->value] = distances[pair->value1] + cursor->weight;
+                    fathers[cursor->value] = pair->value1;
+                    heap_update(&Heaper, distances[cursor->value], cursor->value);
+                }
+                cursor = cursor->next;
+            }
         }
     }
 }
