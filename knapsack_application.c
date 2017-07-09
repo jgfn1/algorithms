@@ -78,75 +78,84 @@ int* rounds_played;
 
 int main()
 {
-	int i;
-	int attractions_n;
-	int visits_n;
-	int* fun_attr;
-	int* boredom_attr;
-	int* cost_attr;
+    int i;
+    int attractions_n;
+    int visits_n;
+    int* fun_attr;
+    int* boredom_attr;
+    int* cost_attr;
 
-	scanf("%d", &attractions_n);
-	
-	fun_attr = (int*) malloc(attractions_n * sizeof(int));
-	boredom_attr = (int*) malloc(attractions_n * sizeof(int));
-	cost_attr = (int*) malloc(attractions_n * sizeof(int));
-	rounds_played = (int*) malloc(attractions_n * sizeof(int));
+    scanf("%d", &attractions_n);
 
-	for(i = 0; i < attractions_n; ++i)
-	{
-		rounds_played[i] = 1;
-	}
+    fun_attr = (int*) malloc(attractions_n * sizeof(int));
+    boredom_attr = (int*) malloc(attractions_n * sizeof(int));
+    cost_attr = (int*) malloc(attractions_n * sizeof(int));
+    rounds_played = (int*) malloc(attractions_n * sizeof(int));
 
-	for(i = 0; i < attractions_n; ++i)
-		scanf("%d %d %d", &fun_attr[i], &boredom_attr[i], &cost_attr[i]);
+    for(i = 0; i < attractions_n; ++i)
+    {
+        rounds_played[i] = 1;
+    }
 
-	scanf("%d", &visits_n);
+    for(i = 0; i < attractions_n; ++i)
+        scanf("%d %d %d", &fun_attr[i], &boredom_attr[i], &cost_attr[i]);
 
-	int credits;
-	/*credits = (int*) malloc(visits_n * sizeof(int));*/
+    scanf("%d", &visits_n);
 
-	for (i = 0; i < visits_n; ++i)
-	{
-		scanf("%d", &credits/*[i]*/);
-		printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, credits/*[i]*/, attractions_n));
-	}
+    int credits;
+    /*credits = (int*) malloc(visits_n * sizeof(int));*/
+
+    for (i = 0; i < visits_n; ++i)
+    {
+        scanf("%d", &credits/*[i]*/);
+        printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, credits/*[i]*/, attractions_n));
+    }
 }
 
 int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
 {
-	return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
+    return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
 }
 
 int zero_one_knapsack(int* values, int* weights, int capacity, int items_n)
 {
-	int i;
-	int j;
-	int** matrix;
-	
-	matrix = (int**) malloc(items_n * sizeof(int*));
-	for(i = 0; i < items_n; ++i)
-		matrix[i] = (int*) calloc(capacity, sizeof(int));
+    int i;
+    int j = 0;
+    int** matrix;
 
-	for(i = 1; i < items_n; ++i)
-	{
-		for(j = 1; j < capacity; ++j)
-		{
-			if(weights[i - 1] <= j && (values[i - 1] + matrix[i - 1][j - weights[i - 1]]) > matrix[i - 1][j])
-			{
-				matrix[i][j] = values[i - 1] + matrix[i - 1][j - weights[i - 1]];
-				values[i] = fun_decay(i, rounds_played[i], values, weights);
-				rounds_played[i]++; 
-			}
-			else
-			{
-				matrix[i][j] = matrix[i - 1][j];
-				if(matrix[i][j] != 0)
-				{
-					values[i] = fun_decay(i, rounds_played[i], values, weights);
-					rounds_played[i]++; 
-				}
-			}
-		}
-	}
-	return matrix[i - 1][j - 1];
+    matrix = (int**) malloc((items_n + 1) * sizeof(int*));
+    for(i = 0; i <= items_n; ++i)
+        matrix[i] = (int*) calloc((capacity + 1), sizeof(int));
+
+    for(i = 1; i <= items_n; ++i)
+    {
+        for(j = 1; j <= capacity; ++j)
+        {
+            if((weights[i - 1] <= j) && ((values[i - 1] + matrix[i - 1][j - weights[i - 1]]) > matrix[i - 1][j]))
+            {
+                matrix[i][j] = values[i - 1] + matrix[i - 1][j - weights[i - 1]];
+
+                /*int x;
+                 x = fun_decay(i, rounds_played[i], values, weights);
+                if(x < 0)
+                    x = 0;
+                values[i] = x;
+                rounds_played[i]++; */
+            }
+            else
+            {
+                matrix[i][j] = matrix[i - 1][j];
+                /*if(matrix[i][j] != 0)
+                {
+                    int x;
+                     x = fun_decay(i, rounds_played[i], values, weights);
+                    if(x < 0)
+                        x = 0;
+                    values[i] = x;
+                    rounds_played[i]++;
+                }*/
+            }
+        }
+    }
+    return matrix[i - 1][j - 1];
 }
