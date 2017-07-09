@@ -1,18 +1,18 @@
 /*
-* DESCRIÇÃO DO PROBLEMA | PROBLEM DESCRIPTION
+* DESCRI��O DO PROBLEMA | PROBLEM DESCRIPTION
 *
-* PORTUGUÊS:
-* Um pai deseja levar o filho ao parque de diversões e divertí-lo o máximo possível.
+* PORTUGU�S:
+* Um pai deseja levar o filho ao parque de divers�es e divert�-lo o m�ximo poss�vel.
 * O parque possui N brinquedos, numerados de 0 a N-1, cada um com um custo diferente
-* de C[i] créditos por corrida. O atencioso pai percebeu que o seu filho possui lá
-* suas preferências e atribuiu a cada brinquedo um índice inicial de diversão S[i]
-* para i=0,...,N-1. A criança pode andar mais de uma vez em cada brinquedo, mas o pai
-* também percebeu que a empolgação vai diminuindo rapidamente a cada corrida.
-* Ele associou a cada brinquedo um fator de aborrecimento B[i], e estimou que a diversão
-* obtida na k-ésima corrida no brinquedo i decai para F(i,k)=S[i]-(k-1)²*B[i],
-* para k=1,2,3,..., sendo a diversão considerada nula assim que esse valor de F(i,k)
-* torna-se <=0. Sabendo que o pai só dispõe de um cartão com uma quantidade limitada
-* de créditos K, sua tarefa é ajudá-lo a escolher os brinquedos que resultem na maior diversão possível.
+* de C[i] cr�ditos por corrida. O atencioso pai percebeu que o seu filho possui l�
+* suas prefer�ncias e atribuiu a cada brinquedo um �ndice inicial de divers�o S[i]
+* para i=0,...,N-1. A crian�a pode andar mais de uma vez em cada brinquedo, mas o pai
+* tamb�m percebeu que a empolga��o vai diminuindo rapidamente a cada corrida.
+* Ele associou a cada brinquedo um fator de aborrecimento B[i], e estimou que a divers�o
+* obtida na k-�sima corrida no brinquedo i decai para F(i,k)=S[i]-(k-1)�*B[i],
+* para k=1,2,3,..., sendo a divers�o considerada nula assim que esse valor de F(i,k)
+* torna-se <=0. Sabendo que o pai s� disp�e de um cart�o com uma quantidade limitada
+* de cr�ditos K, sua tarefa � ajud�-lo a escolher os brinquedos que resultem na maior divers�o poss�vel.
 *
 *
 * ENGLISH:
@@ -72,7 +72,7 @@ Output:
 #include "stdio.h"
 #include "stdlib.h"
 
-int zero_one_knapsack(int* values, int* weights, int capacity, int items_n);
+int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n);
 
 int* rounds_played;
 
@@ -108,7 +108,7 @@ int main()
     for (i = 0; i < visits_n; ++i)
     {
         scanf("%d", &credits/*[i]*/);
-        printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, credits/*[i]*/, attractions_n));
+        printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits/*[i]*/, attractions_n));
     }
 }
 
@@ -117,10 +117,11 @@ int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
     return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
 }
 
-int zero_one_knapsack(int* values, int* weights, int capacity, int items_n)
+int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n)
 {
-    int i;
+    int i = 0;
     int j = 0;
+    int k = 0;
     int** matrix;
 
     matrix = (int**) malloc((items_n + 1) * sizeof(int*));
@@ -132,30 +133,54 @@ int zero_one_knapsack(int* values, int* weights, int capacity, int items_n)
         for(j = 1; j <= capacity; ++j)
         {
             if((weights[i - 1] <= j) && ((values[i - 1] + matrix[i - 1][j - weights[i - 1]]) > matrix[i - 1][j]))
-            {
                 matrix[i][j] = values[i - 1] + matrix[i - 1][j - weights[i - 1]];
-
-                /*int x;
-                 x = fun_decay(i, rounds_played[i], values, weights);
-                if(x < 0)
-                    x = 0;
-                values[i] = x;
-                rounds_played[i]++; */
-            }
             else
-            {
                 matrix[i][j] = matrix[i - 1][j];
-                /*if(matrix[i][j] != 0)
-                {
-                    int x;
-                     x = fun_decay(i, rounds_played[i], values, weights);
-                    if(x < 0)
-                        x = 0;
-                    values[i] = x;
-                    rounds_played[i]++;
-                }*/
-            }
         }
     }
+    /*
+    Pseudo code to find the elements which are in the bag:
+    https://stackoverflow.com/questions/7489398/how-to-find-which-elements-are-in-the-bag-using-knapsack-algorithm-and-not-onl
+        
+    line <- W
+    i <- n
+    while (i> 0):
+      if dp[line][i] - dp[line - weight(i)][i-1] == value(i):
+          the element 'i' is in the knapsack
+          i <- i-1 //only in 0-1 knapsack
+          line <- line - weight(i)
+      else: 
+          i <- i-1 
+    */
+
+    int* used_items = NULL;
+    int item_counter = 0;
+    used_items = (int*) malloc(items_n * sizeof(int));
+
+    int row = capacity;
+    int column = items_n;
+    while(column > 0)
+    {
+        if(matrix[row][column] - matrix[row - weights[i]][column - 1] == values[i])
+        {
+            used_items[item_counter] = column - 1;
+            ++item_counter;
+            --column;
+            row -= weights[column];
+        }
+        else
+            --column;
+    }
+
+    int x = 0;
+    for(k = 0; k < item_counter; ++k)
+    {
+         x = fun_decay(k, rounds_played[k], values, boredom);
+        if(x < 0)
+            x = 0;
+        values[k] = x;
+        rounds_played[k]++; 
+    }
+
     return matrix[i - 1][j - 1];
 }
