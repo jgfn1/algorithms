@@ -69,6 +69,13 @@ Output:
 9: 484
 */
 
+#include "stdio.h"
+#include "stdlib.h"
+
+int zero_one_knapsack(int* values, int* weights, int capacity, int items_n);
+
+int* rounds_played;
+
 int main()
 {
 	int i;
@@ -83,20 +90,31 @@ int main()
 	fun_attr = (int*) malloc(attractions_n * sizeof(int));
 	boredom_attr = (int*) malloc(attractions_n * sizeof(int));
 	cost_attr = (int*) malloc(attractions_n * sizeof(int));
+	rounds_played = (int*) malloc(attractions_n * sizeof(int));
+
+	for(i = 0; i < attractions_n; ++i)
+	{
+		rounds_played[i] = 1;
+	}
 
 	for(i = 0; i < attractions_n; ++i)
 		scanf("%d %d %d", &fun_attr[i], &boredom_attr[i], &cost_attr[i]);
 
 	scanf("%d", &visits_n);
 
-	/*int* credits;
-	credits = (int*) malloc(visits_n * sizeof(int));*/
+	int credits;
+	/*credits = (int*) malloc(visits_n * sizeof(int));*/
 
 	for (i = 0; i < visits_n; ++i)
 	{
 		scanf("%d", &credits/*[i]*/);
-		printf("%d: %d", i, zero_one_knapsack(fun_attr, cost_attr, credits/*[i]*/, attractions_n));
+		printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, credits/*[i]*/, attractions_n));
 	}
+}
+
+int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
+{
+	return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
 }
 
 int zero_one_knapsack(int* values, int* weights, int capacity, int items_n)
@@ -115,10 +133,19 @@ int zero_one_knapsack(int* values, int* weights, int capacity, int items_n)
 		{
 			if(weights[i - 1] <= j && (values[i - 1] + matrix[i - 1][j - weights[i - 1]]) > matrix[i - 1][j])
 			{
-				matrix[i][j] = values[i - 1] + matrix[i - 1][j - weights[i - 1]]; 
+				matrix[i][j] = values[i - 1] + matrix[i - 1][j - weights[i - 1]];
+				values[i] = fun_decay(i, rounds_played[i], values, weights);
+				rounds_played[i]++; 
 			}
 			else
+			{
 				matrix[i][j] = matrix[i - 1][j];
+				if(matrix[i][j] != 0)
+				{
+					values[i] = fun_decay(i, rounds_played[i], values, weights);
+					rounds_played[i]++; 
+				}
+			}
 		}
 	}
 	return matrix[i - 1][j - 1];
