@@ -71,8 +71,10 @@ Output:
 
 #include "stdio.h"
 #include "stdlib.h"
+#include "math.h"
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n);
+int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr);
 
 int* rounds_played;
 
@@ -114,7 +116,7 @@ int main()
 
 int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
 {
-    return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
+    return (fun_attr[attraction] - (pow((round - 1), 2) * boredom_attr[attraction]));
 }
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n)
@@ -141,7 +143,7 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
     /*
     Pseudo code to find the elements which are in the bag:
     https://stackoverflow.com/questions/7489398/how-to-find-which-elements-are-in-the-bag-using-knapsack-algorithm-and-not-onl
-        
+
     line <- W
     i <- n
     while (i> 0):
@@ -149,10 +151,9 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
           the element 'i' is in the knapsack
           i <- i-1 //only in 0-1 knapsack
           line <- line - weight(i)
-      else: 
-          i <- i-1 
+      else:
+          i <- i-1
     */
-
     int* used_items = NULL;
     int item_counter = 0;
     used_items = (int*) malloc(items_n * sizeof(int));
@@ -161,26 +162,32 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
     int column = items_n;
     while(column > 0)
     {
-        if(matrix[row][column] - matrix[row - weights[i]][column - 1] == values[i])
+        if(((row - weights[column - 1]) >= 0) && (matrix[column][row] - matrix[column - 1][row - weights[column - 1]] == values[column - 1]))
         {
-            used_items[item_counter] = column - 1;
-            ++item_counter;
-            --column;
+            used_items[item_counter] = column;
+//            printf("Used items: %d\n", used_items[item_counter]);
+            item_counter++;
+            column--;
             row -= weights[column];
         }
         else
-            --column;
+            column--;
     }
 
     int x = 0;
     for(k = 0; k < item_counter; ++k)
     {
-         x = fun_decay(k, rounds_played[k], values, boredom);
+    	printf("Before: %d\n", values[used_items[k]]);
+        x = fun_decay(used_items[k], rounds_played[used_items[k]], values, boredom);
         if(x < 0)
+        {
             x = 0;
-        values[k] = x;
-        rounds_played[k]++; 
-    }
+        }
+        printf("After: %d\n", x);
 
+        values[used_items[k]] = x;
+        rounds_played[used_items[k]]++;
+    }
+    printf("Used items qnt: %d\n", k);
     return matrix[i - 1][j - 1];
 }
