@@ -111,12 +111,13 @@ int main()
     {
         scanf("%d", &credits/*[i]*/);
         printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits/*[i]*/, attractions_n));
+        printf("\n");
     }
 }
 
 int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
 {
-    return (fun_attr[attraction] - (pow((round - 1), 2) * boredom_attr[attraction]));
+    return (fun_attr[attraction - 1] - (pow((round - 1), 2) * boredom_attr[attraction - 1]));
 }
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n)
@@ -165,7 +166,7 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
         if(((row - weights[column - 1]) >= 0) && (matrix[column][row] - matrix[column - 1][row - weights[column - 1]] == values[column - 1]))
         {
             used_items[item_counter] = column;
-//            printf("Used items: %d\n", used_items[item_counter]);
+            printf("Used items: %d\n", used_items[item_counter]);
             item_counter++;
             column--;
             row -= weights[column];
@@ -177,17 +178,30 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
     int x = 0;
     for(k = 0; k < item_counter; ++k)
     {
-    	printf("Before: %d\n", values[used_items[k]]);
-        x = fun_decay(used_items[k], rounds_played[used_items[k]], values, boredom);
+        // printf("Before: %d\n", values[used_items[k]]);
+        x = fun_decay(used_items[k], rounds_played[used_items[k] - 1], values, boredom);
         if(x < 0)
         {
             x = 0;
         }
-        printf("After: %d\n", x);
+        // printf("After: %d\n", x);
 
-        values[used_items[k]] = x;
-        rounds_played[used_items[k]]++;
+        values[used_items[k] - 1] = x;
+        rounds_played[used_items[k] - 1]++;
     }
-    printf("Used items qnt: %d\n", k);
+    // printf("Used items qnt: %d\n", k);
     return matrix[i - 1][j - 1];
 }
+
+/*
+0: 681
+1: 0
+2: 423
+3: 803
+4: 127
+5: 0
+6: 681
+7: 803
+8: 127
+9: 484
+*/
