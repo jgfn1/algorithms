@@ -103,11 +103,34 @@ int main()
     scanf("%d", &visits_n);
 
     int credits;
-    /*credits = (int*) malloc(visits_n * sizeof(int));*/
 
     for (i = 0; i < visits_n; ++i)
     {
         scanf("%d", &credits);
+
+        /*
+        Idea: we need to use the original 0/1 knapsack but we also need
+        to consider the cases in which the kid plays in one attraction
+        more than once, so, if we can't change our knapsack, we need to
+        change our input to get the desired result. The strategy is the
+        following, we have to add new values to our fun_attr and cost_attr
+        in a way that they'll represent the possible repetitions. 
+        
+        ATTENTION: We can't forget to decrease the fun amount in the repetitions 
+        which will be added to the vector.
+
+        Technical changes:
+            - Each item will be added to the vectors X times, in which 
+        X = floor(credits / cost[item]); 
+        
+            - The fun amount will be decreased according to the fun_decay function.
+
+            - The cost of each attraction is constant.    
+        */
+
+        
+
+        /*fun_decay(k, rounds_played[k], values, boredom);*/
 
         zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits, attractions_n)
 
@@ -148,7 +171,5 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
                 matrix[i][j] = matrix[i - 1][j];
         }
     }
-/*    fun_decay(k, rounds_played[k], values, boredom);*/
-
     return matrix[i - 1][j - 1];
 }
