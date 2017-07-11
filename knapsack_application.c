@@ -107,8 +107,11 @@ int main()
 
     for (i = 0; i < visits_n; ++i)
     {
-        scanf("%d", &credits/*[i]*/);
-        printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits/*[i]*/, attractions_n));
+        scanf("%d", &credits);
+
+        zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits, attractions_n)
+
+        printf("%d: %d\n", i, );
     }
 
     free(fun_attr);
@@ -145,53 +148,7 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
                 matrix[i][j] = matrix[i - 1][j];
         }
     }
-    /*
-    Pseudo code to find the elements which are in the bag:
-    https://stackoverflow.com/questions/7489398/how-to-find-which-elements-are-in-the-bag-using-knapsack-algorithm-and-not-onl
-
-    line <- W
-    i <- n
-    while (i> 0):
-      if dp[line][i] - dp[line - weight(i)][i-1] == value(i):
-          the element 'i' is in the knapsack
-          i <- i-1 //only in 0-1 knapsack
-          line <- line - weight(i)
-      else:
-          i <- i-1
-    */
-    int* used_items = NULL;
-    int item_counter = 0;
-    used_items = (int*) malloc(items_n * sizeof(int));
-
-    int row = capacity;
-    int column = items_n;
-    while(column > 0)
-    {
-        if(matrix[column][row] - matrix[column - 1][row - weights[column]] == values[column])
-        {
-            used_items[item_counter] = column - 1;
-            ++item_counter;
-            --column;
-            row -= weights[column];
-        }
-        else
-            --column;
-    }
-
-    int x = 0;
-    for(k = 0; k < item_counter; ++k)
-    {
-        x = fun_decay(k, rounds_played[k], values, boredom);
-        if(x < 0)
-            x = 0;
-        values[k] = x;
-        rounds_played[k]++;
-    }
-
-    for(i = 0; i <= items_n; ++i)
-        free(matrix[i]);
-    free(matrix);
-    free(used_items);
+/*    fun_decay(k, rounds_played[k], values, boredom);*/
 
     return matrix[i - 1][j - 1];
 }
