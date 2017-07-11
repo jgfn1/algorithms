@@ -120,14 +120,20 @@ int main()
         which will be added to the vector.
 
         Technical changes:
-            - Each item will be added to the vectors X times, in which 
-        X = floor(credits / cost[item]); 
-        
-            - The fun amount will be decreased according to the fun_decay function.
+            - If the boredom[item] != 0, each item will be added to the vectors until 
+            their fun reaches 0, else, it will be added X times, in which 
+            X = floor(credits / cost[item]);
+            
+            - The fun amount will be decreased at each iteration according to the 
+            fun_decay function.
 
-            - The cost of each attraction is constant.    
+            - The cost of each attraction is constant.
+
+        Optimization note:
+            - We shall avoid re-calculating the knapsack as much as we can, this is
+            possible if we re-use the matrix every time the available credits of the 
+            (i + 1)th iteration is smaller than or equal to the one of the ith one.
         */
-
         
 
         /*fun_decay(k, rounds_played[k], values, boredom);*/
