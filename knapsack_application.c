@@ -1,18 +1,18 @@
 /*
-* DESCRI��O DO PROBLEMA | PROBLEM DESCRIPTION
+* DESCRI??O DO PROBLEMA | PROBLEM DESCRIPTION
 *
-* PORTUGU�S:
-* Um pai deseja levar o filho ao parque de divers�es e divert�-lo o m�ximo poss�vel.
+* PORTUGU?S:
+* Um pai deseja levar o filho ao parque de divers?es e divert?-lo o m?ximo poss?vel.
 * O parque possui N brinquedos, numerados de 0 a N-1, cada um com um custo diferente
-* de C[i] cr�ditos por corrida. O atencioso pai percebeu que o seu filho possui l�
-* suas prefer�ncias e atribuiu a cada brinquedo um �ndice inicial de divers�o S[i]
-* para i=0,...,N-1. A crian�a pode andar mais de uma vez em cada brinquedo, mas o pai
-* tamb�m percebeu que a empolga��o vai diminuindo rapidamente a cada corrida.
-* Ele associou a cada brinquedo um fator de aborrecimento B[i], e estimou que a divers�o
-* obtida na k-�sima corrida no brinquedo i decai para F(i,k)=S[i]-(k-1)�*B[i],
-* para k=1,2,3,..., sendo a divers�o considerada nula assim que esse valor de F(i,k)
-* torna-se <=0. Sabendo que o pai s� disp�e de um cart�o com uma quantidade limitada
-* de cr�ditos K, sua tarefa � ajud�-lo a escolher os brinquedos que resultem na maior divers�o poss�vel.
+* de C[i] cr?ditos por corrida. O atencioso pai percebeu que o seu filho possui l?
+* suas prefer?ncias e atribuiu a cada brinquedo um ?ndice inicial de divers?o S[i]
+* para i=0,...,N-1. A crian?a pode andar mais de uma vez em cada brinquedo, mas o pai
+* tamb?m percebeu que a empolga??o vai diminuindo rapidamente a cada corrida.
+* Ele associou a cada brinquedo um fator de aborrecimento B[i], e estimou que a divers?o
+* obtida na k-?sima corrida no brinquedo i decai para F(i,k)=S[i]-(k-1)?*B[i],
+* para k=1,2,3,..., sendo a divers?o considerada nula assim que esse valor de F(i,k)
+* torna-se <=0. Sabendo que o pai s? disp?e de um cart?o com uma quantidade limitada
+* de cr?ditos K, sua tarefa ? ajud?-lo a escolher os brinquedos que resultem na maior divers?o poss?vel.
 *
 *
 * ENGLISH:
@@ -71,10 +71,8 @@ Output:
 
 #include "stdio.h"
 #include "stdlib.h"
-#include "math.h"
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n);
-int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr);
 
 int* rounds_played;
 
@@ -111,13 +109,19 @@ int main()
     {
         scanf("%d", &credits/*[i]*/);
         printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits/*[i]*/, attractions_n));
-        printf("\n");
     }
+
+    free(fun_attr);
+    free(boredom_attr);
+    free(cost_attr);
+    free(rounds_played);
+    
+    return 0;
 }
 
 int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
 {
-    return (fun_attr[attraction - 1] - (pow((round - 1), 2) * boredom_attr[attraction - 1]));
+    return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
 }
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n)
@@ -163,45 +167,31 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
     int column = items_n;
     while(column > 0)
     {
-        if(((row - weights[column - 1]) >= 0) && (matrix[column][row] - matrix[column - 1][row - weights[column - 1]] == values[column - 1]))
+        if(matrix[column][row] - matrix[column - 1][row - weights[column]] == values[column])
         {
-            used_items[item_counter] = column;
-            printf("Used items: %d\n", used_items[item_counter]);
-            item_counter++;
-            column--;
+            used_items[item_counter] = column - 1;
+            ++item_counter;
+            --column;
             row -= weights[column];
         }
         else
-            column--;
+            --column;
     }
 
     int x = 0;
     for(k = 0; k < item_counter; ++k)
     {
-        // printf("Before: %d\n", values[used_items[k]]);
-        x = fun_decay(used_items[k], rounds_played[used_items[k] - 1], values, boredom);
+        x = fun_decay(k, rounds_played[k], values, boredom);
         if(x < 0)
-        {
             x = 0;
-        }
-        // printf("After: %d\n", x);
-
-        values[used_items[k] - 1] = x;
-        rounds_played[used_items[k] - 1]++;
+        values[k] = x;
+        rounds_played[k]++;
     }
-    // printf("Used items qnt: %d\n", k);
+
+    for(i = 0; i <= items_n; ++i)
+        free(matrix[i]);
+    free(matrix);
+    free(used_items);
+
     return matrix[i - 1][j - 1];
 }
-
-/*
-0: 681
-1: 0
-2: 423
-3: 803
-4: 127
-5: 0
-6: 681
-7: 803
-8: 127
-9: 484
-*/
