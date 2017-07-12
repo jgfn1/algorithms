@@ -71,31 +71,35 @@ Output:
 
 #include "stdio.h"
 #include "stdlib.h"
+#include "math.h"
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n);
+int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr);
 
-int* rounds_played;
+
+/*int* rounds_played;*/
+int** matrix;
 
 int main()
 {
     int i;
     int attractions_n;
     int visits_n;
-    int* fun_attr;
     int* boredom_attr;
     int* cost_attr;
+    int* fun_attr;
 
     scanf("%d", &attractions_n);
 
-    fun_attr = (int*) malloc(attractions_n * sizeof(int));
+    fun_attr = (int*) malloc(/*attractions_n*/1000000 * sizeof(int));
     boredom_attr = (int*) malloc(attractions_n * sizeof(int));
-    cost_attr = (int*) malloc(attractions_n * sizeof(int));
-    rounds_played = (int*) malloc(attractions_n * sizeof(int));
+    cost_attr = (int*) malloc(/*attractions_n*/1000000 * sizeof(int));
+    // rounds_played = (int*) malloc(attractions_n * sizeof(int));
 
-    for(i = 0; i < attractions_n; ++i)
+    /*for(i = 0; i < attractions_n; ++i)
     {
         rounds_played[i] = 1;
-    }
+    }*/
 
     for(i = 0; i < attractions_n; ++i)
         scanf("%d %d %d", &fun_attr[i], &boredom_attr[i], &cost_attr[i]);
@@ -114,54 +118,104 @@ int main()
         more than once, so, if we can't change our knapsack, we need to
         change our input to get the desired result. The strategy is the
         following, we have to add new values to our fun_attr and cost_attr
-        in a way that they'll represent the possible repetitions. 
-        
-        ATTENTION: We can't forget to decrease the fun amount in the repetitions 
+        in a way that they'll represent the possible repetitions.
+
+        ATTENTION: We can't forget to decrease the fun amount in the repetitions
         which will be added to the vector.
 
         Technical changes:
-            - If the boredom[item] != 0, each item will be added to the vectors until 
-            their fun reaches 0, else, it will be added X times, in which 
+            - If the boredom[item] != 0, each item will be added to the vectors until
+            their fun reaches 0, else, it will be added X times, in which
             X = floor(credits / cost[item]);
-            
-            - The fun amount will be decreased at each iteration according to the 
+
+            - The fun amount will be decreased at each iteration according to the
             fun_decay function.
 
             - The cost of each attraction is constant.
 
         Optimization note:
             - We shall avoid re-calculating the knapsack as much as we can, this is
-            possible if we re-use the matrix every time the available credits of the 
+            possible if we re-use the matrix every time the available credits of the
             (i + 1)th iteration is smaller than or equal to the one of the ith one.
         */
-        
 
-        /*fun_decay(k, rounds_played[k], values, boredom);*/
+        int attr_aux = attractions_n;
+        int j = 0;
+        int rounds_played = 1;
+        int decay;
 
-        zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits, attractions_n)
+        for (j = 0; j < attractions_n; ++j)
+        {
+            if(boredom_attr[j] != 0)
+            {
+                do
+                {
+                    rounds_played++;
+                    attr_aux++;
 
-        printf("%d: %d\n", i, );
+                    //                    fun_attr = (int*) realloc(fun_attr, attr_aux);
+                    //                    cost_attr = (int*) realloc(cost_attr, attr_aux);
+
+                    decay = fun_decay(j, rounds_played, fun_attr, boredom_attr);
+
+                    if(decay < 0)
+                        decay = 0;
+
+                    fun_attr[attr_aux] = decay;
+                    cost_attr[attr_aux] = cost_attr[j];
+
+
+
+                } while(fun_attr[attr_aux] > 0);
+                rounds_played = 1;
+
+            }
+            else
+            {
+                if(cost_attr[j] != 0)
+                {
+                    int y = floor(credits / cost_attr[j]) - 1;
+                    attr_aux += y;
+
+                    //                fun_attr = (int*) realloc(fun_attr, attr_aux);
+                    //                cost_attr = (int*) realloc(cost_attr, attr_aux);
+                    int k;
+                    for(k = 0; k < y; ++k)
+                    {
+                        fun_attr[attr_aux - y + k] = fun_attr[j];
+                        cost_attr[attr_aux - y + k] = cost_attr[j];
+                    }
+                }
+            }
+        }
+
+        /*for(j = 0; j < attr_aux; ++j)
+        {
+            printf("fun_attr[%d]: %d ", j, fun_attr[j]);
+        }
+        printf("\n");*/
+
+        printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits, attr_aux));
+
     }
 
     free(fun_attr);
     free(boredom_attr);
     free(cost_attr);
-    free(rounds_played);
-    
+    // free(rounds_played);
+
     return 0;
 }
 
 int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
 {
-    return (fun_attr[attraction] - (((round - 2)^2) * boredom_attr[attraction]));
+    return (fun_attr[attraction] - (pow((round - 1), 2) * boredom_attr[attraction]));
 }
 
 int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n)
 {
     int i = 0;
     int j = 0;
-    int k = 0;
-    int** matrix;
 
     matrix = (int**) malloc((items_n + 1) * sizeof(int*));
     for(i = 0; i <= items_n; ++i)
