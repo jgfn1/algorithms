@@ -73,13 +73,12 @@ Output:
 #include "stdlib.h"
 #include "math.h"
 
-int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n);
+int zero_one_knapsack(int* values, int* weights, int capacity, int items_n);
 int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr);
-
 
 /*int* rounds_played;*/
 int** matrix;
-
+int index1;
 int main()
 {
     int i;
@@ -88,6 +87,7 @@ int main()
     int* boredom_attr;
     int* cost_attr;
     int* fun_attr;
+    int attr_aux;
 
     scanf("%d", &attractions_n);
 
@@ -106,11 +106,67 @@ int main()
 
     scanf("%d", &visits_n);
 
-    int credits;
+
+    int credits[2];
+    i = 0;
+    credits[i % 2] = 25001;
+    /*int */attr_aux = attractions_n;
+    int j = 0;
+    int rounds_played = 1;
+    int decay;
+    int savior = 0;
+    for (j = 0; j < attractions_n; ++j)
+    {
+        if(boredom_attr[j] != 0)
+        {
+        	savior = cost_attr[j];
+            do
+            {
+                rounds_played++;
+                attr_aux++;
+
+                //                    fun_attr = (int*) realloc(fun_attr, attr_aux);
+                //                    cost_attr = (int*) realloc(cost_attr, attr_aux);
+
+                decay = fun_decay(j, rounds_played, fun_attr, boredom_attr);
+
+                if(decay < 0)
+                    decay = 0;
+
+                fun_attr[attr_aux] = decay;
+                cost_attr[attr_aux] = cost_attr[j];
+
+                savior += cost_attr[j];
+
+            } while(fun_attr[attr_aux] > 0 && (savior <= credits[i % 2]));
+            rounds_played = 1;
+
+        }
+        else
+        {
+            if(cost_attr[j] != 0)
+            {
+                int y = /*floor*/(credits[i % 2] / cost_attr[j]) - 1;
+                attr_aux += y;
+
+                //                fun_attr = (int*) realloc(fun_attr, attr_aux);
+                //                cost_attr = (int*) realloc(cost_attr, attr_aux);
+                int k;
+                for(k = 0; k < y; ++k)
+                {
+                    fun_attr[attr_aux - y + k] = fun_attr[j];
+                    cost_attr[attr_aux - y + k] = cost_attr[j];
+                }
+            }
+        }
+    }
+
+    zero_one_knapsack(fun_attr, cost_attr, credits[i % 2], attr_aux);
+
 
     for (i = 0; i < visits_n; ++i)
     {
-        scanf("%d", &credits);
+        scanf("%d", &credits[i % 2]);
 
         /*
         Idea: we need to use the original 0/1 knapsack but we also need
@@ -138,65 +194,7 @@ int main()
             possible if we re-use the matrix every time the available credits of the
             (i + 1)th iteration is smaller than or equal to the one of the ith one.
         */
-
-        int attr_aux = attractions_n;
-        int j = 0;
-        int rounds_played = 1;
-        int decay;
-
-        for (j = 0; j < attractions_n; ++j)
-        {
-            if(boredom_attr[j] != 0)
-            {
-                do
-                {
-                    rounds_played++;
-                    attr_aux++;
-
-                    //                    fun_attr = (int*) realloc(fun_attr, attr_aux);
-                    //                    cost_attr = (int*) realloc(cost_attr, attr_aux);
-
-                    decay = fun_decay(j, rounds_played, fun_attr, boredom_attr);
-
-                    if(decay < 0)
-                        decay = 0;
-
-                    fun_attr[attr_aux] = decay;
-                    cost_attr[attr_aux] = cost_attr[j];
-
-
-
-                } while(fun_attr[attr_aux] > 0);
-                rounds_played = 1;
-
-            }
-            else
-            {
-                if(cost_attr[j] != 0)
-                {
-                    int y = floor(credits / cost_attr[j]) - 1;
-                    attr_aux += y;
-
-                    //                fun_attr = (int*) realloc(fun_attr, attr_aux);
-                    //                cost_attr = (int*) realloc(cost_attr, attr_aux);
-                    int k;
-                    for(k = 0; k < y; ++k)
-                    {
-                        fun_attr[attr_aux - y + k] = fun_attr[j];
-                        cost_attr[attr_aux - y + k] = cost_attr[j];
-                    }
-                }
-            }
-        }
-
-        /*for(j = 0; j < attr_aux; ++j)
-        {
-            printf("fun_attr[%d]: %d ", j, fun_attr[j]);
-        }
-        printf("\n");*/
-
-        printf("%d: %d\n", i, zero_one_knapsack(fun_attr, cost_attr, boredom_attr, credits, attr_aux));
-
+        printf("%d: %d\n", i, matrix[index1][ credits[(i % 2) ]]);
     }
 
     free(fun_attr);
@@ -212,7 +210,7 @@ int fun_decay(int attraction, int round, int* fun_attr, int* boredom_attr)
     return (fun_attr[attraction] - (pow((round - 1), 2) * boredom_attr[attraction]));
 }
 
-int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int items_n)
+int zero_one_knapsack(int* values, int* weights, int capacity, int items_n)
 {
     int i = 0;
     int j = 0;
@@ -231,5 +229,6 @@ int zero_one_knapsack(int* values, int* weights, int* boredom, int capacity, int
                 matrix[i][j] = matrix[i - 1][j];
         }
     }
+    index1 = i - 1;
     return matrix[i - 1][j - 1];
 }
